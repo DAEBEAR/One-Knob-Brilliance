@@ -17,7 +17,7 @@ FetchContent_MakeAvailable(juce)
 # 2. Configurazione Asset Grafici (Sfondo e Knob)
 juce_add_binary_data(PluginAssets
     SOURCES
-        Resources/background_oneknob.jpg
+        Resources/background_oneknob.png
         Resources/knob_oneknob.png
 )
 

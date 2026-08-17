@@ -5,7 +5,7 @@ OneKnobSaturatorAudioProcessorEditor::OneKnobSaturatorAudioProcessorEditor (OneK
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Caricamento dello sfondo in legno
-    backgroundImage = juce::ImageCache::getFromMemory (BinaryData::background_oneknob_jpg, BinaryData::background_oneknob_jpgSize);
+    backgroundImage = juce::ImageCache::getFromMemory (BinaryData::background_oneknob_png, BinaryData::background_oneknob_pngSize);
 
     // Configurazione Manopola
     driveSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
