@@ -1,0 +1,17 @@
+# CMake builds
+build/
+bin/
+out/
+.cmake/
+
+# IDE files
+.vscode/
+.idea/
+*.xcodeproj/
+*.xcworkspace/
+*.sln
+*.vcxproj
+
+# OS Specific
+.DS_Store
+Thumbs.db
