@@ -10,7 +10,9 @@ class CustomKnobLookAndFeel : public juce::LookAndFeel_V4
 public:
     CustomKnobLookAndFeel()
     {
-        knobImage = juce::ImageCache::getFromMemory (BinaryData::knob_oneknob_png, BinaryData::knob_oneknob_pngSize);
+        // Forziamo la decodifica dell'immagine mantenendo il canale Alpha (ARGB)
+        auto loadedImage = juce::ImageCache::getFromMemory (BinaryData::knob_oneknob_png, BinaryData::knob_oneknob_pngSize);
+        knobImage = loadedImage.convertedToFormat (juce::Image::ARGB);
     }
 
     void drawRotarySlider (juce::Graphics& g, int x, int y, int width, int height,
@@ -22,19 +24,19 @@ public:
 
         const float angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
         
-        // Calcolo delle dimensioni e del centro del bounds della manopola JUCE
-        const float destWidth = static_cast<float> (width);
-        const float destHeight = static_cast<float> (height);
-        const float centreX = static_cast<float> (x) + destWidth * 0.5f;
-        const float centreY = static_cast<float> (y) + destHeight * 0.5f;
+        const float destW = static_cast<float> (width);
+        const float destH = static_cast<float> (height);
+        const float centreX = static_cast<float> (x) + destW * 0.5f;
+        const float centreY = static_cast<float> (y) + destH * 0.5f;
 
         const float imgW = static_cast<float> (knobImage.getWidth());
         const float imgH = static_cast<float> (knobImage.getHeight());
 
-        // Calcola la scala per adattare l'immagine PNG alla dimensione dello slider
-        const float scale = juce::jmin (destWidth / imgW, destHeight / imgH);
+        const float scale = juce::jmin (destW / imgW, destH / imgH);
 
-        // Trasformazione: centra l'origine dell'immagine -> scala -> ruota -> trasla al centro dello slider
+        // Disegno con interpolazione bilineare trasparente
+        g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
+
         juce::AffineTransform transform = juce::AffineTransform::translation (-imgW * 0.5f, -imgH * 0.5f)
                                            .scaled (scale)
                                            .rotated (angle)

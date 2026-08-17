@@ -4,23 +4,23 @@
 OneKnobSaturatorAudioProcessorEditor::OneKnobSaturatorAudioProcessorEditor (OneKnobSaturatorAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    // Caricamento dello sfondo aggiornato a formato PNG
     backgroundImage = juce::ImageCache::getFromMemory (BinaryData::background_oneknob_png, BinaryData::background_oneknob_pngSize);
 
     driveSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     driveSlider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
     driveSlider.setLookAndFeel (&customKnobLAF);
     
-    // Rotazione da 0 a MAX
-    driveSlider.setRotaryParameters (juce::MathConstants<float>::pi * 1.25f, 
-                                     juce::MathConstants<float>::pi * 2.75f, true);
+    // Rotazione calibrata per allinearsi all'arco 0 - MAX
+    driveSlider.setRotaryParameters (juce::MathConstants<float>::pi * 1.22f, 
+                                     juce::MathConstants<float>::pi * 2.78f, true);
     
     addAndMakeVisible (driveSlider);
 
     driveAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         audioProcessor.apvts, "DRIVE", driveSlider);
 
-    // Dimensioni finestra proporzionate all'immagine originale
-    setSize (400, 560);
+    setSize (420, 588);
 }
 
 OneKnobSaturatorAudioProcessorEditor::~OneKnobSaturatorAudioProcessorEditor()
@@ -42,10 +42,10 @@ void OneKnobSaturatorAudioProcessorEditor::paint (juce::Graphics& g)
 
 void OneKnobSaturatorAudioProcessorEditor::resized()
 {
-    // Centraggio dinamico calcolato sulle proporzioni del pannello in legno
-    const int knobSize = static_cast<int>(getWidth() * 0.68f); // 68% della larghezza della GUI
+    // Posizionamento della manopola centrato sull'arco
+    const int knobSize = static_cast<int>(getWidth() * 0.54f);
     const int knobX = (getWidth() - knobSize) / 2;
-    const int knobY = static_cast<int>(getHeight() * 0.44f);  // Posizionato esattamente al centro dell'arco graduato
+    const int knobY = static_cast<int>(getHeight() * 0.50f);
 
     driveSlider.setBounds (knobX, knobY, knobSize, knobSize);
 }

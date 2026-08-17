@@ -5,7 +5,6 @@ project(OneKnobSaturator VERSION 1.0.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 1. Download e integrazione JUCE 8
 include(FetchContent)
 FetchContent_Declare(
     juce
@@ -14,14 +13,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(juce)
 
-# 2. Configurazione Asset Grafici (Sfondo e Knob)
+# Binary Data configurato per entrambi i file PNG
 juce_add_binary_data(PluginAssets
     SOURCES
-        Resources/background_oneknob.png
-        Resources/knob_oneknob.png
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resources/background_oneknob.png"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resources/knob_oneknob.png"
 )
 
-# 3. Definizione del Plugin
 juce_add_plugin(OneKnobSaturator
     COMPANY_NAME "DAEBAER Plugins"
     IS_SYNTH FALSE
@@ -36,10 +34,8 @@ juce_add_plugin(OneKnobSaturator
     PRODUCT_NAME "OneKnobSaturator"
 )
 
-# Generazione Header JUCE
 juce_generate_juce_header(OneKnobSaturator)
 
-# 4. Sorgenti del progetto
 target_sources(OneKnobSaturator
     PRIVATE
         Source/PluginProcessor.cpp
@@ -48,7 +44,6 @@ target_sources(OneKnobSaturator
         Source/PluginEditor.h
 )
 
-# 5. Link delle Librerie JUCE e Asset Binari
 target_link_libraries(OneKnobSaturator
     PRIVATE
         PluginAssets
@@ -71,7 +66,6 @@ target_link_libraries(OneKnobSaturator
         juce::juce_recommended_warning_flags
 )
 
-# 6. Flag di Compilazione
 target_compile_definitions(OneKnobSaturator
     PUBLIC
         JUCE_WEB_BROWSER=0
