@@ -5,7 +5,7 @@ project(OneKnobSaturator VERSION 1.0.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Scarica JUCE 8.0.4 da GitHub (include le patch di compatibilità per macOS 15 Sequoia)
+# Scarica JUCE 8.0.4 da GitHub (compatibile con macOS 15 e Xcode 16)
 include(FetchContent)
 FetchContent_Declare(
     juce
@@ -28,6 +28,9 @@ juce_add_plugin(OneKnobSaturator
     FORMATS VST3 AU Standalone
     PRODUCT_NAME "OneKnobSaturator"
 )
+
+# Genera JuceHeader.h per la compatibilità degli include
+juce_generate_juce_header(OneKnobSaturator)
 
 # File Sorgente
 target_sources(OneKnobSaturator
