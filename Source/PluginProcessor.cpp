@@ -26,7 +26,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout OneKnobSaturatorAudioProcess
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-    // Manopola DRIVE (0.0 -> 100.0%)
     layout.add(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID ("DRIVE", 1),
         "Drive",
@@ -34,7 +33,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout OneKnobSaturatorAudioProcess
         0.0f
     ));
 
-    // Selettore MODE (0: Warm Tape, 1: Tube, 2: Diode Clipper)
     layout.add(std::make_unique<juce::AudioParameterChoice>(
         juce::ParameterID ("MODE", 1),
         "Saturation Mode",
@@ -52,7 +50,6 @@ void OneKnobSaturatorAudioProcessor::prepareToPlay (double sampleRate, int sampl
     spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
     spec.numChannels = static_cast<juce::uint32>(getTotalNumInputChannels());
 
-    // Configurazione filtro High-Pass 24 dB/oct (4° ordine) fisso a 90 Hz
     *lowCutFilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(sampleRate, 90.0f, 0.707f);
     lowCutFilter.prepare(spec);
     lowCutFilter.reset();
@@ -94,18 +91,21 @@ void OneKnobSaturatorAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // Lettura dei parametri
-    float driveNormalized = apvts.getRawParameterValue("DRIVE")->load() / 100.0f; // Range: 0.0 -> 1.0
+    float driveNormalized = apvts.getRawParameterValue("DRIVE")->load() / 100.0f;
     int mode = static_cast<int>(apvts.getRawParameterValue("MODE")->load());
 
-    // Calcolo guadagno di Drive (fino a +30 dB)
-    float driveGainDB = driveNormalized * 30.0f;
-    float driveGainLinear = juce::Decibels::decibelsToGain(driveGainDB);
+    // Base drive fino a +36 dB
+    float baseDriveDB = driveNormalized * 36.0f;
+    float modeGainBoostDB = 0.0f;
 
-    // Dynamic AutoGain Compensation
-    float autoGainComp = 1.0f / std::pow(driveGainLinear, 0.70f);
+    if (mode == 1) modeGainBoostDB = 6.0f;       // Tube boost
+    else if (mode == 2) modeGainBoostDB = 12.0f;  // Diode boost per clipping marcato
 
-    // 1. Processo di Saturazione canale per canale
+    float totalDriveGainLinear = juce::Decibels::decibelsToGain(baseDriveDB + modeGainBoostDB);
+
+    // AutoGain ricalibrato in base alla risposta dinamica
+    float autoGainComp = 1.0f / std::pow(totalDriveGainLinear, 0.82f);
+
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
@@ -113,42 +113,52 @@ void OneKnobSaturatorAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
             float inputSample = channelData[sample];
-            float driven = inputSample * driveGainLinear;
+            float driven = inputSample * totalDriveGainLinear;
             float saturated = driven;
 
             switch (mode)
             {
-                case 0: // Warm Tape Saturation (Soft Tanh)
-                    saturated = std::tanh(driven);
+                case 0: // WARM TAPE: Compressione morbida e saturazione analogica nastro
+                {
+                    float x = driven * 0.8f;
+                    // Curva asimmetrica leggera per simulare il nastro
+                    float tapeSim = std::tanh(x + 0.1f * x * x);
+                    saturated = tapeSim * 1.1f;
                     break;
+                }
 
-                case 1: // Tube Saturation (Asimmetrica, ricca di armoniche pari)
-                    if (driven > 0.0f)
-                        saturated = 1.0f - std::exp(-driven);
+                case 1: // TUBE SATURATION: Armoniche pari marcate e suono valvolare caldo
+                {
+                    float x = driven;
+                    if (x > 0.0f)
+                        saturated = 1.5f * (1.0f - std::exp(-x));
                     else
-                        saturated = -std::tanh(std::abs(driven));
+                        saturated = -1.2f * (1.0f - std::exp(x));
                     break;
+                }
 
-                case 2: // Diode Clipper (Clipping aggressivo con soft-knee)
-                    {
-                        float x = driven;
-                        if (x > 1.2f)        saturated = 1.0f;
-                        else if (x < -1.2f)  saturated = -1.0f;
-                        else                 saturated = x - (0.333f * std::pow(x, 3.0f));
-                    }
+                case 2: // DIODE CLIPPER: Clipping duro con distorsione metallica/aggressiva
+                {
+                    float x = driven * 1.5f;
+                    // Hard-knee diode wave shaping
+                    if (x > 1.0f)       saturated = 0.85f + 0.15f * std::tanh((x - 1.0f) * 2.0f);
+                    else if (x < -1.0f) saturated = -0.85f + 0.15f * std::tanh((x + 1.0f) * 2.0f);
+                    else                saturated = x - (0.33f * std::pow(x, 3.0f));
+                    
+                    saturated *= 1.15f;
                     break;
+                }
 
                 default:
                     saturated = std::tanh(driven);
                     break;
             }
 
-            // Applicazione AutoGain
             channelData[sample] = saturated * autoGainComp;
         }
     }
 
-    // 2. Low-Cut Post-Saturazione (Fisso a 90 Hz, 24 dB/oct)
+    // Low-Cut 24 dB/oct @ 90Hz post-saturazione
     juce::dsp::AudioBlock<float> block (buffer);
     juce::dsp::ProcessContextReplacing<float> context (block);
     lowCutFilter.process(context);

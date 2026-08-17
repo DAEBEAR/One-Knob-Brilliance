@@ -5,7 +5,6 @@ project(OneKnobSaturator VERSION 1.0.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Scarica JUCE 8.0.4 da GitHub (compatibile con macOS 15 e Xcode 16)
 include(FetchContent)
 FetchContent_Declare(
     juce
@@ -14,25 +13,22 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(juce)
 
-# Configurazione del Plugin JUCE
 juce_add_plugin(OneKnobSaturator
-    COMPANY_NAME "YourName"
+    COMPANY_NAME "DAEBAER Plugins"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     COPY_PLUGIN_AFTER_BUILD TRUE
-    PLUGIN_MANUFACTURER_CODE YoNa
+    PLUGIN_MANUFACTURER_CODE Daeb
     PLUGIN_CODE Oks1
     FORMATS VST3 AU Standalone
     PRODUCT_NAME "OneKnobSaturator"
 )
 
-# Genera JuceHeader.h per la compatibilità degli include
 juce_generate_juce_header(OneKnobSaturator)
 
-# File Sorgente
 target_sources(OneKnobSaturator
     PRIVATE
         Source/PluginProcessor.cpp
@@ -41,7 +37,6 @@ target_sources(OneKnobSaturator
         Source/PluginEditor.h
 )
 
-# Moduli JUCE richiesti
 target_link_libraries(OneKnobSaturator
     PRIVATE
         juce::juce_audio_basics
@@ -63,7 +58,6 @@ target_link_libraries(OneKnobSaturator
         juce::juce_recommended_warning_flags
 )
 
-# Definizioni di compilazione
 target_compile_definitions(OneKnobSaturator
     PUBLIC
         JUCE_WEB_BROWSER=0

@@ -4,14 +4,21 @@
 OneKnobSaturatorAudioProcessorEditor::OneKnobSaturatorAudioProcessorEditor (OneKnobSaturatorAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    // Titolo
+    // Brand Subtitle
+    brandLabel.setText("DAEBAER PLUGINS", juce::dontSendNotification);
+    brandLabel.setFont(juce::FontOptions(11.0f, juce::Font::bold));
+    brandLabel.setJustificationType(juce::Justification::centred);
+    brandLabel.setColour(juce::Label::textColourId, juce::Colours::grey);
+    addAndMakeVisible(brandLabel);
+
+    // Titolo Plugin
     titleLabel.setText("ONE KNOB SATURATOR", juce::dontSendNotification);
-    titleLabel.setFont(juce::FontOptions(18.0f, juce::Font::bold));
+    titleLabel.setFont(juce::FontOptions(16.0f, juce::Font::bold));
     titleLabel.setJustificationType(juce::Justification::centred);
     titleLabel.setColour(juce::Label::textColourId, juce::Colours::orange);
     addAndMakeVisible(titleLabel);
 
-    // Drive Slider (Manopolone principale)
+    // Drive Slider
     driveSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     driveSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
     addAndMakeVisible(driveSlider);
@@ -21,7 +28,7 @@ OneKnobSaturatorAudioProcessorEditor::OneKnobSaturatorAudioProcessorEditor (OneK
     driveLabel.setJustificationType(juce::Justification::centred);
     addAndMakeVisible(driveLabel);
 
-    // Mode ComboBox (Interruttore Saturation Mode)
+    // Mode Selector
     modeSelector.addItem("Warm Tape", 1);
     modeSelector.addItem("Tube Saturation", 2);
     modeSelector.addItem("Diode Clipper", 3);
@@ -32,14 +39,14 @@ OneKnobSaturatorAudioProcessorEditor::OneKnobSaturatorAudioProcessorEditor (OneK
     modeLabel.setJustificationType(juce::Justification::centred);
     addAndMakeVisible(modeLabel);
 
-    // APVTS Attachments
+    // Attachments APVTS
     driveAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         audioProcessor.apvts, "DRIVE", driveSlider);
     
     modeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
         audioProcessor.apvts, "MODE", modeSelector);
 
-    setSize (300, 400);
+    setSize (300, 420);
 }
 
 OneKnobSaturatorAudioProcessorEditor::~OneKnobSaturatorAudioProcessorEditor()
@@ -48,10 +55,8 @@ OneKnobSaturatorAudioProcessorEditor::~OneKnobSaturatorAudioProcessorEditor()
 
 void OneKnobSaturatorAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // Sfondo dark elegant
-    g.fillAll (juce::Colour (0xff1a1a1a));
+    g.fillAll (juce::Colour (0xff141414));
 
-    // Bordo interno stilizzato
     g.setColour (juce::Colour (0xff2d2d2d));
     g.drawRoundedRectangle (10.0f, 10.0f, static_cast<float>(getWidth() - 20), static_cast<float>(getHeight() - 20), 10.0f, 2.0f);
 }
@@ -60,16 +65,15 @@ void OneKnobSaturatorAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds().reduced(20);
 
-    titleLabel.setBounds(area.removeFromTop(30));
+    brandLabel.setBounds(area.removeFromTop(16));
+    titleLabel.setBounds(area.removeFromTop(24));
     area.removeFromTop(10);
 
-    // Mode Switcher in alto
     modeLabel.setBounds(area.removeFromTop(15));
     modeSelector.setBounds(area.removeFromTop(30).reduced(20, 0));
 
-    area.removeFromTop(20);
+    area.removeFromTop(15);
 
-    // Large Rotary Knob al centro
     driveLabel.setBounds(area.removeFromTop(15));
     driveSlider.setBounds(area.removeFromTop(200));
 }

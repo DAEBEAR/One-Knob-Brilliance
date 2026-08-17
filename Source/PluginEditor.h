@@ -22,6 +22,7 @@ private:
     juce::Label driveLabel;
     juce::Label modeLabel;
     juce::Label titleLabel;
+    juce::Label brandLabel;
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> modeAttachment;
