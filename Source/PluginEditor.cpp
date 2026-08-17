@@ -4,66 +4,51 @@
 OneKnobSaturatorAudioProcessorEditor::OneKnobSaturatorAudioProcessorEditor (OneKnobSaturatorAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    // Brand
-    brandLabel.setText("DAEBAER PLUGINS", juce::dontSendNotification);
-    brandLabel.setFont(juce::FontOptions(11.0f, juce::Font::bold));
-    brandLabel.setJustificationType(juce::Justification::centred);
-    brandLabel.setColour(juce::Label::textColourId, juce::Colours::grey);
-    addAndMakeVisible(brandLabel);
+    // Caricamento dello sfondo in legno
+    backgroundImage = juce::ImageCache::getFromMemory (BinaryData::background_oneknob_jpg, BinaryData::background_oneknob_jpgSize);
 
-    // Title
-    titleLabel.setText("ONE KNOB SATURATOR", juce::dontSendNotification);
-    titleLabel.setFont(juce::FontOptions(16.0f, juce::Font::bold));
-    titleLabel.setJustificationType(juce::Justification::centred);
-    titleLabel.setColour(juce::Label::textColourId, juce::Colours::orange);
-    addAndMakeVisible(titleLabel);
+    // Configurazione Manopola
+    driveSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    driveSlider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+    driveSlider.setLookAndFeel (&customKnobLAF);
+    
+    // Angoli di rotazione allineati con i pallini 0 e MAX sulla grafica in legno
+    driveSlider.setRotaryParameters (juce::MathConstants<float>::pi * 1.25f, 
+                                     juce::MathConstants<float>::pi * 2.75f, true);
+    
+    addAndMakeVisible (driveSlider);
 
-    // Subtitle
-    subtitleLabel.setText("WARM TAPE • 90Hz HPF", juce::dontSendNotification);
-    subtitleLabel.setFont(juce::FontOptions(10.0f, juce::Font::plain));
-    subtitleLabel.setJustificationType(juce::Justification::centred);
-    subtitleLabel.setColour(juce::Label::textColourId, juce::Colours::darkgrey);
-    addAndMakeVisible(subtitleLabel);
-
-    // Drive Knob
-    driveSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    driveSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
-    addAndMakeVisible(driveSlider);
-
-    driveLabel.setText("DRIVE", juce::dontSendNotification);
-    driveLabel.setFont(juce::FontOptions(12.0f, juce::Font::bold));
-    driveLabel.setJustificationType(juce::Justification::centred);
-    addAndMakeVisible(driveLabel);
-
-    // Attachment
+    // Attachment APVTS
     driveAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         audioProcessor.apvts, "DRIVE", driveSlider);
 
-    setSize (280, 360);
+    // Proporzioni basate sull'immagine di sfondo
+    setSize (450, 630);
 }
 
 OneKnobSaturatorAudioProcessorEditor::~OneKnobSaturatorAudioProcessorEditor()
 {
+    driveSlider.setLookAndFeel (nullptr);
 }
 
 void OneKnobSaturatorAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour (0xff141414));
-
-    g.setColour (juce::Colour (0xff2d2d2d));
-    g.drawRoundedRectangle (10.0f, 10.0f, static_cast<float>(getWidth() - 20), static_cast<float>(getHeight() - 20), 10.0f, 2.0f);
+    if (backgroundImage.isValid())
+    {
+        g.drawImage (backgroundImage, getLocalBounds().toFloat(), juce::RectanglePlacement::stretchToFit);
+    }
+    else
+    {
+        g.fillAll (juce::Colours::darkgrey);
+    }
 }
 
 void OneKnobSaturatorAudioProcessorEditor::resized()
 {
-    auto area = getLocalBounds().reduced(20);
+    // Posizionamento e ridimensionamento preciso della manopola al centro della scala incisa
+    int knobSize = 260;
+    int knobX = (getWidth() - knobSize) / 2;
+    int knobY = 280; // Allineato al centro del cerchio graduato
 
-    brandLabel.setBounds(area.removeFromTop(16));
-    titleLabel.setBounds(area.removeFromTop(22));
-    subtitleLabel.setBounds(area.removeFromTop(16));
-    
-    area.removeFromTop(20);
-
-    driveLabel.setBounds(area.removeFromTop(15));
-    driveSlider.setBounds(area.removeFromTop(200));
+    driveSlider.setBounds (knobX, knobY, knobSize, knobSize);
 }
