@@ -43,7 +43,7 @@ public:
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-    // Filtro DSP High-Pass 24 dB/oct (4° ordine) a 90 Hz
+    // Filtro High-Pass 24 dB/oct @ 90 Hz
     juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> lowCutFilter;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OneKnobSaturatorAudioProcessor)
