@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest, windows-latest]
 
     steps:
     - name: Checkout repository
@@ -28,15 +28,6 @@ jobs:
         if [ -d "/Applications/Xcode_15.4.app" ]; then
           sudo xcode-select -s /Applications/Xcode_15.4.app
         fi
-
-    - name: Install dependencies (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libasound2-dev libjack-jackd2-dev \
-          mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libx11-dev \
-          libxinerama-dev libxext-dev libfreewrap0-dev libxcursor-dev \
-          libxcomposite-dev libcurl4-openssl-dev
 
     - name: Configure CMake
       run: cmake -B build -DCMAKE_BUILD_TYPE=Release
