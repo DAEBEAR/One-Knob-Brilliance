@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
 
     steps:
     - name: Checkout repository
@@ -22,11 +22,18 @@ jobs:
       with:
         submodules: true
 
+    - name: Select Xcode Version (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        if [ -d "/Applications/Xcode_15.4.app" ]; then
+          sudo xcode-select -s /Applications/Xcode_15.4.app
+        fi
+
     - name: Install dependencies (Linux)
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libasound2-dev libjack-jackd2-dev ladder-dev \
+        sudo apt-get install -y libasound2-dev libjack-jackd2-dev \
           mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libx11-dev \
           libxinerama-dev libxext-dev libfreewrap0-dev libxcursor-dev \
           libxcomposite-dev libcurl4-openssl-dev
